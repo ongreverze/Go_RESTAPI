@@ -5,8 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"database/sql"
 	"fmt"
-	"log"
-	"strconv"
 	_ "github.com/lib/pq"
 )
 
@@ -19,56 +17,58 @@ const (
   )
 
 type Data struct {
+	Unique_id string `json:"unique_id" binding:"required"`
 	User_name string `json:"user_name" binding:"required"`
 	Age int `json:"age" binding:"required"`
 }
 
-// func (d *Data) addData() (err error) {
-// 	rs, err := db.Exec("INSERT INTO Users(unique_id, name, age) VALUES (? ,?, ?)", d.Unique_id, d.Name, d.Age)
-// 	if err != nil {
-// 		return
-// 	}
-// 	return
-// }
-
-var db *sql.DB
-
-func main(){
-	var err error
+func OpenConnection() *sql.DB {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-    "password=%s dbname=%s sslmode=disable",
+    "password=%s dbname=%s",
     host, port, user, password, dbname)
     db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		log.Fatalln(err)
+		panic(err)
 	}
 
-	defer db.Close()
-
-	if err := db.Ping(); err != nil {
-		log.Fatalln(err)
+	err = db.Ping()
+	if err != nil {
+		panic(err)
 	}
-	
+	return db
+}
+
+func main(){
+	var d Data
 	router := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
 	router.POST("/v1/svc-rpt/report/rptRequestGenReport", func(c *gin.Context){
-		user_name := c.PostForm("user_name")
-		age,_ := strconv.Atoi(c.PostForm("age"))
 
-		rs, err := db.Exec(`INSERT INTO request_log(user_name, age, unique_id) VALUES (?, ?, ?);`, user_name, age)
+		db := OpenConnection()
+
+		if err := c.ShouldBindJSON(&d); err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+			return
+		}
+
+		insertStatement := `INSERT INTO test_ong(unique_id,user_name, age) VALUES ($1,$2,$3)`
+
+		rs,err := db.Exec(insertStatement, d.Unique_id, d.User_name, d.Age)
+
 		fmt.Println(rs)
-        if err != nil {
-            log.Fatalln(err)
-        }
 
-        if err != nil {
-            log.Fatalln(err)
-        }
+		if (err != nil){
+			fmt.Println(err)
+		}
 
-        msg := fmt.Sprintf("insert successful")
-        c.JSON(http.StatusOK, gin.H{
-            "msg": msg,
-        })
+		// close connection
+		defer db.Close()
+
+		c.JSON(http.StatusCreated, "accepted")
+		
 		// unique_id := c.Request.FormValue("unique_id")
 		// name := c.Request.FormValue("name")
 		// str_age := c.Request.FormValue("age")
