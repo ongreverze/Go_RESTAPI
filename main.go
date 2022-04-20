@@ -1,10 +1,11 @@
 package main
 
 import (
-	"net/http"
-	"github.com/gin-gonic/gin"
 	"database/sql"
 	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
@@ -39,6 +40,7 @@ func OpenConnection() *sql.DB {
 }
 
 func main(){
+	
 	var d Data
 	router := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
@@ -58,35 +60,21 @@ func main(){
 
 		rs,err := db.Exec(insertStatement, d.Unique_id, d.User_name, d.Age)
 
-		fmt.Println(rs)
-
 		if (err != nil){
 			fmt.Println(err)
+			c.JSON(http.StatusUnprocessableEntity, gin.H{
+				"error": err,
+			})
+			return
 		}
 
+		fmt.Println(rs)
 		// close connection
 		defer db.Close()
 
 		c.JSON(http.StatusCreated, "accepted")
 		
-		// unique_id := c.Request.FormValue("unique_id")
-		// name := c.Request.FormValue("name")
-		// str_age := c.Request.FormValue("age")
-		// age ,err:= strconv.ParseInt(str_age, 0, 64)
-		// fmt.Println(err)
-
-		// d := Data{Unique_id: unique_id, Name: name, Age: age}
-		// err := d.addData()
-		// if err := c.ShouldBindJSON(&d); err != nil {
-		// 	c.JSON(http.StatusNotFound, gin.H{
-		// 		"status" : http.StatusNotFound , 
-		// 		"error": "Invalid input!"})
-		// 	return
-		// }
-		// msg := fmt.Sprintf("insert successful")
-		// c.JSON(http.StatusAccepted , gin.H{
-		// "status" : http.StatusAccepted,
-		// "message": msg})
+		
 	})
-	router.Run(":8001")
+	router.Run()
 }
