@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"os"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
