@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-
+	"os"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
@@ -40,7 +40,7 @@ func OpenConnection() *sql.DB {
 }
 
 func main(){
-	
+	port := os.Getenv("PORT")
 	var d Data
 	router := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
@@ -77,4 +77,5 @@ func main(){
 		
 	})
 	router.Run()
+	http.ListenAndServe(":"+port,nil)
 }
