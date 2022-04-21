@@ -40,7 +40,6 @@ func OpenConnection() *sql.DB {
 }
 
 func main(){
-	port := os.Getenv("PORT")
 	var d Data
 	router := gin.Default()
 	gin.SetMode(gin.ReleaseMode)
@@ -77,5 +76,4 @@ func main(){
 		
 	})
 	router.Run()
-	http.ListenAndServe(":"+port,nil)
 }
