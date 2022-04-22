@@ -44,7 +44,7 @@ func OpenConnection() *sql.DB {
 func main(){
 	port := os.Getenv("PORT")
 	var d Data
-	router := gin.Default()
+	router := gin.New()
 	gin.SetMode(gin.ReleaseMode)
 	router.POST("/v1/svc-rpt/report/rptRequestGenReport", func(c *gin.Context){
 
@@ -80,5 +80,4 @@ func main(){
 	})
 	router.Run()
 	log.Print("Listening on :" + port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
